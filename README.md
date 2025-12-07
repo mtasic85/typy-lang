@@ -21,9 +21,9 @@ Subset of strongly typed Python
 - Dict type `dict[K, V]` is strongly typed dynamic dictionary/map.
 
 ### Builtin Functions
-- `malloc` from C stdlib.
-- `realloc` from C stdlib.
-- `free` from C stdlib.
+- `malloc` from C stdlib. Usage: `ptr = malloc(size)` where size is a `size_t` and ptr is of type `Ptr[T]`.
+- `realloc` from C stdlib. Usage: `ptr = realloc(ptr, new_size)` where ptr is of type `Ptr[T]` and new_size is a `size_t`.
+- `free` from C stdlib. Usage: `free(ptr)` where ptr is of type `Ptr[T]`.
 
 ### Naming Conventions
 - Functions: `snake_case` (e.g., `point2_add`).
@@ -36,6 +36,8 @@ Subset of strongly typed Python
 - Don't use try/except blocks, it is impossible to raise exceptions.
 - Use explicit error handling.
 - Use `Result[T, E]` (`Ok[T]` and `Err[E]`) and `Option[T]` (`NoneType` and `Some[T]`) patterns inspired by Rust.
+- `Result[T, E]` can be instantiated with `Ok[T]` or `Err[E]` values, not directly with the `Result` type itself.
+- `Option[T]` can be instantiated with `Some[T]` or `NoneType` values, not directly with the `Option` type itself.
 - Return meaningful error instances of `Err[T]` type.
 - Use simple match/case statements to handle errors (simple pattern matching with simple value destruction/unpacking).
 
@@ -47,7 +49,7 @@ Subset of strongly typed Python
 - If user-defined class doesn't inherit other classes it is assumed it inherits `struct`, aka struct type.
 - Struct (`struct`) is a data structure that groups related fields and methods together, allowing you to encapsulate data and functionality.
 - Union (`union`) in typy like in C is a user-defined data type that allows you to store different data types in the same memory location, meaning only one member can hold a value at any given time. This makes unions memory-efficient, as they share the same memory space among their members.
-- Variant (`variant`) is a discriminated union type, similar to std::variant in C++ or enum in Rust. It can store exactly one value that can be any of the specified types, determined at runtime. Variant type cannot be directly instantiated.
+- Variant (`variant`) is a discriminated union type, similar to std::variant in C++ or enum in Rust. It can store exactly one value that can be any of the specified types, determined at runtime. Variant type itself cannot be directly instantiated. However, it can be used as a base class for other types, such as `Result[T, E]` and `Option[T]`, which are designed to be instantiated with their constituent types (`Ok[T]`/`Err[E]` and `Some[T]` respectively).
 - Enum (`enum`) is a way to define a set of named values in the typy programming language, similar to enums in other languages. They are used to create type-safe enumerations which means that enums can have generic types like number types (signed/unsigned integers, floats).
 - Classes have all fields explicitly defined with their types and optional default values.
 - Classes and functions are the primary abstraction.

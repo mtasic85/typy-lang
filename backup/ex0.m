@@ -18,7 +18,7 @@ union LuaValue:
     v_f64: f64
 
 struct LuaObject:
-    type: LueType
+    type: LuaType
     value: LuaValue
 
 variant AnyPoint[X]:

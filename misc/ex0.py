@@ -60,7 +60,7 @@ class LuaValue(union):
     v_f64: f64
 
 class LuaObject:
-    type: LueType
+    type: LuaType
     value: LuaValue
 
 class AnyPoint[X](variant):
