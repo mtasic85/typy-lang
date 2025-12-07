@@ -1,5 +1,14 @@
 
 #
+# protocols
+#
+class Hashable(protocol):
+    def __hash__(self) -> u64:
+        ...
+
+#
+# built-in types
+#
 # built-in types
 #
 class Ok[T]:
@@ -87,3 +96,22 @@ class AnyPoint[X](variant):
         def __add__(self: Self, o: Self) -> Self:
             r: Self = Point3D[Y, Z](self.x + o.x, self.y + o.y, self.z + o.z)
             return r
+
+#
+# protocol usage examples
+#
+class StringHashable:
+    value: str
+    
+    def __hash__(self) -> ssize_t:
+        return hash(self.value)
+
+class IntHashable:
+    value: i32
+    
+    def __hash__(self) -> ssize_t:
+        return hash(self.value)
+
+# Example usage with protocol constraint
+string_dict: dict[StringHashable, str] = dict[StringHashable, str]()
+int_dict: dict[IntHashable, i32] = dict[IntHashable, i32]()
