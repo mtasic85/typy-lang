@@ -27,6 +27,38 @@ Subset of strongly typed Python
 - `realloc` from C stdlib. Usage: `ptr = realloc(ptr, new_size)` where ptr is of type `Ptr[T]` and new_size is a `size_t`.
 - `free` from C stdlib. Usage: `free(ptr)` where ptr is of type `Ptr[T]`.
 
+### Memory Management
+- `ptr(o)` - gets pointer to object `o`, returns `Ptr[T]`
+- `malloc[T](size)` - allocates memory on heap, returns `Ptr[T]`
+- `realloc[T](ptr, new_size)` - resizes memory allocation
+- `free(ptr)` - frees heap memory
+
+Examples:
+```python
+# Stack pointer
+p: Point = Point()
+ptr_p: Ptr[Point] = ptr(p)
+
+# Heap allocation with proper sizing
+size: usize = 10 * sizeof(i32)
+data: Ptr[i32] = malloc[i32](size)
+# Use data...
+free(data)  # Type-safe from variable
+
+# Dynamic resizing example
+capacity: usize = 8
+data_size: usize = capacity * sizeof(f64)
+data: Ptr[f64] = malloc[f64](data_size)
+length: usize = 0
+
+# Resize when needed
+if length >= capacity:
+    new_capacity: usize = capacity * 2
+    new_size: usize = new_capacity * sizeof(f64)
+    data = realloc[f64](data, new_size)
+    capacity = new_capacity
+```
+
 ### Classes/Types
 - Classes (`class` statement) can be used to define custom types/classes.
 - Class can inherit only following classes: `struct`, `union`, `variant`, `enum` and `protocol`.
@@ -40,6 +72,40 @@ Subset of strongly typed Python
 - Enum (`enum`) is a way to define a set of named values in the typy programming language, similar to enums in other languages. They are used to create type-safe enumerations which means that enums can have generic types like number types (signed/unsigned integers, floats). They work like enums in C/C++.
 - Protocol (`protocol`) defines an interface or contract that types must implement. Protocols specify method signatures that implementing classes must provide. Protocols enable structural typing and can be used as constraints in generic types. For example, `dict[K: Hashable, V]` ensures that keys implement the `Hashable` protocol. Single class can satisfy multiple protocols at once. Protocol type `protocol` defines an interface that types must implement. Protocols specify methods that implementing classes must provide. For example: `class Hashable(protocol): def __hash__(self) -> ssize: pass`. Protocol methods definitions can be empty and use `pass` statement.
 - As implementation detail and choice, `struct`, `union`, `variant`, `enum` and `protocol` subclass universal supertype called `object`. `object` cannot be directly inherited. `object` cannot be instantiated.
+
+### Single Inheritance Rules
+Classes can inherit from exactly one of the following base types:
+- `struct` - for data structures with related fields  
+- `union` - for memory-efficient type storage
+- `variant` - for discriminated unions
+- `enum` - for type-safe enumerations
+- `protocol` - for interface contracts
+
+Multiple inheritance is not supported. Classes that don't inherit any base type default to `struct`.
+
+Examples:
+```python
+# Struct inheritance - extends data structure
+class ColoredPoint[T](struct):
+    x: T
+    y: T
+    color: str
+
+# Protocol inheritance - implements interface
+class HashablePoint[T](struct):
+    x: T
+    y: T
+    
+    def __hash__(self) -> ssize:
+        return hash(self.x) + hash(self.y)
+
+# Enum inheritance - extends enumeration
+class ExtendedStatus(enum):
+    OK = 0
+    ERROR = 1
+    WARNING = 2
+    CRITICAL = 3
+```
 
 ### Protocol Usage in Generic Types
 Generic types can specify protocol constraints using the format `GenericType[T: Protocol]`. This ensures that type parameters implement required methods.
@@ -96,6 +162,23 @@ Examples:
 - Functions that can return potential error should use `Result[T, E]` as return type. They return meaningful error instances of `Err[T]` type, or value of type `Ok[T]` in case of success.
 - Functions that don't return errors, but might return optional values, should use `Option[T]` as return type.
 - Use simple match/case statements to handle errors (simple pattern matching with simple value destruction/unpacking).
+
+### Error Propagation
+Functions can propagate `Result` errors up the call chain without modification:
+
+```python
+def read_file(path: str) -> Result[str, FileError]:
+    # ... implementation ...
+
+def process_file(path: str) -> Result[str, FileError]:
+    result: Result[str, FileError] = read_file(path)
+    
+    match result:
+        case Ok(content):
+            return Ok[str](process(content))
+        case Err(e):
+            return Err[FileError](e)  # Simple propagation
+```
 
 ### General
 - Use proper type annotations for all function parameters and return values.
