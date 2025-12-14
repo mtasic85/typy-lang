@@ -13,14 +13,15 @@ Subset of strongly typed Python
   - Unsigned integers: `u8`, `u16`, `u32`, `u64` (equivalent of `uintN_t` in C, where `N` is number of bits).
   - Size integers: `ssize` (equivalent for signed `ssize_t` in C), `usize` (equivalent for unsigned `size_t` in C).
   - `ptrdiff` (equivalent of `ptrdiff_t` in C). `ptrdiff` is the signed integer type of the result of subtracting two pointers. It is used for pointer arithmetic and array indexing, if negative values are possible.
-- Float types: f32, f64 .
+- Float types: `f32`, `f64` .
+- Since numbers constants (integers, floats, etc) don't hold prefix/suffix what is their type, we need to explicitly encapsulate numbers like `a: i32 = i32(10)` to represent for example signed 32-bit integer of value `10`, and this logic applies for all numerals.
 - Byte type `byte` is single C-char encoded as unsigned 8-bit integer, for example: `b0: byte = b'H'`. Byte has always length 1.
 - Pointer type `Ptr[T]` is safe strongly typed generic type, for example: `ByteP: type = Ptr[byte]`.
 - Pointer value of type `Ptr[T]` obtained using `ptr(o)` is pointer of an object, for example `v_p: ByteP = ptr(b'H')`.
 - Bytes type `bytes` which is C-like string. Null characters are allowed anywhere in `bytes`. It is implemented as struct with `len: size_t` and `data: Ptr[byte]`.
 - String type `str` which is utf-8 encoded unicode. Null characters are allowed anywhere in `str`. It is implemented as struct with `len: size_t` and `data: Ptr[byte]`.
 - List type `list[T]` is strongly typed dynamic array. It is implemented as struct with `cap: size_t` (capacity), `len: size_t` (length), `items: Ptr[T]`.
-- Dict type `dict[K, V]` is strongly typed dynamic dictionary/map. When dict is used, the key type `K` must implement the `Hashable` protocol, e.g., `dict[K: Hashable, V]`.
+- Dict type `dict[K, V]` is strongly typed dynamic dictionary/map. When dict is used, the key type `K` must implement the `HashProtocol` protocol, e.g., `dict[K: HashProtocol, V]`.
 
 ### Builtin Functions
 - `malloc` from C stdlib. Usage: `ptr = malloc(size)` where size is a `size_t` and ptr is of type `Ptr[T]`.
@@ -70,7 +71,7 @@ if length >= capacity:
 - Union (`union`) in typy like in C is a user-defined data type that allows you to store different data types in the same memory location, meaning only one member can hold a value at any given time. This makes unions memory-efficient, as they share the same memory space among their members.
 - Variant (`variant`) is a discriminated union type, similar to std::variant in C++, enum in Rust, Variant in Mojo programming language. It can store exactly one value that can be any of the specified types, determined at runtime. Variant type itself cannot be directly instantiated. However, it can be used as a base class for other types, such as `Result[T, E]` and `Option[T]`, which are designed to be instantiated with their constituent types (`Ok[T]`/`Err[E]` and `Some[T]` respectively). Variant is more like declaration since it cannot be instantiated directly.
 - Enum (`enum`) is a way to define a set of named values in the typy programming language, similar to enums in other languages. They are used to create type-safe enumerations which means that enums can have generic types like number types (signed/unsigned integers, floats). They work like enums in C/C++.
-- Protocol (`protocol`) defines an interface or contract that types must implement. Protocols specify method signatures that implementing classes must provide. Protocols enable structural typing and can be used as constraints in generic types. For example, `dict[K: Hashable, V]` ensures that keys implement the `Hashable` protocol. Single class can satisfy multiple protocols at once. Protocol type `protocol` defines an interface that types must implement. Protocols specify methods that implementing classes must provide. For example: `class Hashable(protocol): def __hash__(self) -> ssize: pass`. Protocol methods definitions can be empty and use `pass` statement.
+- Protocol (`protocol`) defines an interface or contract that types must implement. Protocols specify method signatures that implementing classes must provide. Protocols enable structural typing and can be used as constraints in generic types. For example, `dict[K: HashProtocol, V]` ensures that keys implement the `HashProtocol` protocol. Single class can satisfy multiple protocols at once. Protocol type `protocol` defines an interface that types must implement. Protocols specify methods that implementing classes must provide. For example: `class HashProtocol(protocol): def __hash__(self) -> ssize: pass`. Protocol methods definitions can be empty and use `pass` statement.
 - As implementation detail and choice, `struct`, `union`, `variant`, `enum` and `protocol` subclass universal supertype called `object`. `object` cannot be directly inherited. `object` cannot be instantiated.
 
 ### Single Inheritance Rules
@@ -111,12 +112,13 @@ class ExtendedStatus(enum):
 Generic types can specify protocol constraints using the format `GenericType[T: Protocol]`. This ensures that type parameters implement required methods.
 
 Examples:
-- `dict[K: Hashable, V]` - ensures keys are hashable
+- `dict[K: HashProtocol, V]` - ensures keys are hashable
 - `list[T: Serializable]` - ensures items are serializable
-- `Hashable` implementation:
+- `HashProtocol` implementation:
   ```python
-  class Hashable(protocol):
-      def __hash__(self) -> ssize: pass
+  class HashProtocol(protocol):
+      def __hash__(self) -> ssize:
+          pass
   
   class SomeInt[T: Integer]:
       v: T
@@ -127,10 +129,11 @@ Examples:
       def __hash__(self) -> ssize:
           return self.v
   ```
-- `Copyable` implementation:
+- `CopyProtocol` implementation:
   ```python
-  class Copyable(protocol):
-      def __copy__[C: Copyable](self: C) -> C: pass
+  class CopyProtocol(protocol):
+      def __copy__(self) -> Self:
+          pass
   
   class One:
       def __copy__(self) -> One:
@@ -140,7 +143,7 @@ Examples:
       def __copy__[T: Other](self: T) -> T:
           pass
   
-  c: Copyable
+  c: CopyProtocol
   c = One()  # OK
   c = Other()  # Also OK
   ```
