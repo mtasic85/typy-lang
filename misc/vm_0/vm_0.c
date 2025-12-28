@@ -108,9 +108,11 @@ struct tp_object_t* custom_user_function(struct tp_ctx_t* ctx, tp_object_t* args
     struct tp_object_t* a3 = tp_array_new(ctx, 8); // create array with len 0 and cap 8
     tp_object_mark_return(ctx, a3); // a3 survives, escapes current (function) scope, since it is marked to be returned
 
-    struct tp_object_t* a4 = tp_array_new(ctx, 8);
-    struct tp_object_t* a5 = tp_array_new(ctx, 8);
+    struct tp_object_t* a4 = tp_i32_new(ctx, 1);
+    struct tp_object_t* a5 = tp_i32_new(ctx, 2);
     struct tp_object_t* args1 = tp_array_new(ctx, 8);
+    tp_array_append(ctx, a4);
+    tp_array_append(ctx, a5);
     struct tp_object_t* kwargs1 = tp_map_new(ctx, 8); // create map with "capacity" 8; actually `capacity == mask + 1`
     tp_object_mark_move(ctx, args1); // mark object to be moved to new scope; should not be used in current scope past this point
     tp_object_mark_move(ctx, kwargs1); // mark object to be moved to new scope; should not be used in current scope past this point

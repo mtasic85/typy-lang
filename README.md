@@ -113,7 +113,7 @@ Generic types can specify protocol constraints using the format `GenericType[T: 
 
 Examples:
 - `dict[K: HashProtocol, V]` - ensures keys are hashable
-- `list[T: Serializable]` - ensures items are serializable
+- `list[T: SerializeProtocol]` - ensures items are serializable
 - `HashProtocol` implementation:
   ```python
   class HashProtocol(protocol):
@@ -167,21 +167,8 @@ Examples:
 - Use simple match/case statements to handle errors (simple pattern matching with simple value destruction/unpacking).
 
 ### Error Propagation
-Functions can propagate `Result` errors up the call chain without modification:
 
-```python
-def read_file(path: str) -> Result[str, FileError]:
-    # ... implementation ...
-
-def process_file(path: str) -> Result[str, FileError]:
-    result: Result[str, FileError] = read_file(path)
-    
-    match result:
-        case Ok(content):
-            return Ok[str](process(content))
-        case Err(e):
-            return Err[FileError](e)  # Simple propagation
-```
+Functions can propagate `Result` errors up the call chain without modification.
 
 ### General
 - Use proper type annotations for all function parameters and return values.
