@@ -1,6 +1,17 @@
 # typy
 
-typy (aka typy-lang) is strongly-typed Python subset.
+typy (aka typy-lang) is strongly typed Python subset.
+
+typy is implemented in C99/C11.
+typy is interpreted language which require compiler and virtual machine.
+Virtual machine is register based.
+Direct threading is a technique used in typy to improve the efficiency of instruction dispatch in virtual machine.
+typy doesn't implement JIT, but doesn't limit future versions to implement it, or to implement Ahead of Time compiler directly to native code for a given platform/architecutre.
+typy compiler produces bytecode from source code.
+Bytecode can be file by file, or it can be combined bytecode for all compiled typy source files.
+Once bootstrapped, typy is used to implement its own builtins/stdlib.
+To consider complete bootstrapped version of typy, it means that all low-level (primitive number types), memory management functions, and generics are already implemented.
+typy does not use GC, but has well structured/defined set of rules how automatic memory management is handled.
 
 
 ## typy doesn't have/support
@@ -307,3 +318,12 @@ Each type has almost the same methods like Python, just strongly typed.
 ## Error Propagation
 
 Functions can propagate `Result` errors up the call chain without modification.
+
+## Automatic memory management
+
+typy doesn't have and doesn't use GC. Instead, typy has semantically structured memory management.
+
+Examples:
+```python
+
+```
