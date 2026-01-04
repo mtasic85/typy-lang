@@ -365,8 +365,8 @@ x: i32 = 10
 y: i32 = 20
 z: i32 = 30
 
-def f(x: i32, y: i32) -> (i32, i32):
+def f(x: i32, y: i32, z: i32) -> (i32, i32):
     return x, y
 
-x, y = f(x, y)
+x, y = f(x, y, z)
 ```
