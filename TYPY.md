@@ -319,11 +319,54 @@ Each type has almost the same methods like Python, just strongly typed.
 
 Functions can propagate `Result` errors up the call chain without modification.
 
-## Automatic memory management
+## Automatic memory management (AMM)
 
 typy doesn't have and doesn't use GC. Instead, typy has semantically structured memory management.
 
 Examples:
 ```python
+x: i32 = 10
+y: i32 = 20
 
+def f(x: i32, y: i32) -> i32:
+    z: i32 = x + y
+    return z
+
+z: i32 = f(x, y) # x, y are moved inside of f1; f1 is responsible for their lifetime
+# w: i32 = x + y # panics because x, y are moved to f1
+```
+
+```python
+x: i32 = 10
+y: i32 = 20
+
+def f(x: i32, y: i32) -> (i32, i32):
+    x += 1 # local x got new value
+    y += 1 # local x got new value
+    return x, y # returns new objects/values
+
+x, y = f(x, y) # it is ok because x, y get reassigned, but kept their type
+```
+
+```python
+x: i32 = 10
+y: i32 = 20
+
+def f(x: i32, y: i32) -> (i32, i32):
+    return x, y
+
+x1: i32
+y1: i32
+x1, y1 = f2(x, y)
+```
+
+```python
+x: i32 = 10
+y: i32 = 20
+z: i32 = 30
+
+def f(x: i32, y: i32) -> (i32, i32):
+    return x, y
+
+x, y = f(x, y)
 ```
