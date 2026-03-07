@@ -50,9 +50,16 @@ class Point(struct):
     x: float32_t
     y: float32_t
 
+    def add(self, other: Point) -> Point:
+        result: Point = Point(0.0, 0.0)
+        result.x = self.x + other.x
+        result.y = self.y + other.y
+        return result
+
 
 p0 := Point(10.0, 20.0)
 p1 := Point(20.0, 30.0)
+p2 := p0.add(p1)
 ```
 
 ### Generic Functions
@@ -74,8 +81,14 @@ class Point[T](struct):
    x: T
    y: T
 
+   def add(self, other: Point[T]) -> Point[T]:
+        result: Point[T] = Point[T](0)
+        result.x = self.x + other.x
+        result.y = self.y + other.y
+        return result
+
 p0: Point[int32_t] = Point[int32_t](10, 20)
-p0: Point = Point[int32_t](10, 20)
+p1: Point = Point[int32_t](10, 20)
 p0 = Point[int32_t](10, 20)
 
 p1: Point[float32_t] = Point[float32_t](10.0, 20.0)
