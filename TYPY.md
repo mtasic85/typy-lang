@@ -25,6 +25,7 @@ typy does not use GC, but has well structured/defined set of rules how automatic
 - generator expression, what looks like a "tuple comprehension", which creates a generator object that produces items lazily
 - `yield` statement, so generators are not supported
 - an assignment expression operator called walrus operator `:=`
+- all decorators are unsupported, eg `@name` and `@name(args)`
 
 
 ## typy has/supports
@@ -40,6 +41,8 @@ typy does not use GC, but has well structured/defined set of rules how automatic
 - `import`, `import ... as ...`, `from ... import ...`, `from ... import ... as ...` statements
 - multiple object return in form of statically typed `tuple`
 - variable number of arguments `*args` and keyword arguments `**kwargs`; `*args` and `**kwargs` are statically typed
+- functions and types are first-class objects
+- function closures
 
 
 ## Builtin types, functions, constants
@@ -319,6 +322,8 @@ Each type has almost the same methods like Python, just strongly typed.
 
 Functions can propagate `Result` errors up the call chain without modification.
 
+
+<!--
 ## Automatic memory management (AMM)
 
 typy doesn't have and doesn't use GC. Instead, typy has semantically structured memory management.
@@ -370,3 +375,4 @@ def f(x: i32, y: i32, z: i32) -> (i32, i32):
 
 x, y = f(x, y, z)
 ```
+-->
