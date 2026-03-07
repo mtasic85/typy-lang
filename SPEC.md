@@ -2,7 +2,7 @@
 
 ## Primitive Types
 
-All primitive types from the C standard library are fully supported in typy-lang.
+All primitive types from the C standard library are fully supported in typy-lang. This includes integer types (int8_t, int16_t, int32_t, int64_t, etc.), floating-point types (float, double, long double), and other C types (char, bool, size_t, pointers, etc.).
 
 ## Variable Declaration and Definition
 
@@ -19,7 +19,26 @@ a: int8_t = 10 # value is of type int8_t and it's found at compile-time
 b: uint16_t = 11 # here value is of type uint16_t
 ```
 
+## Variable Declaration and Definition
+
+### Syntax
+
+```python
+variable_name: type = value  # value is of type `type` and it's found at compile-time
+```
+
+### Examples
+
+```python
+a: int8_t = 10  # value is of type int8_t and it's found at compile-time
+b: uint16_t = 11  # here value is of type uint16_t
+c: float32_t = 3.14  # floating-point value
+d: bool = True  # boolean value
+```
+
 ## Function Definitions
+
+Function definitions in TYPY follow strict typing rules. All parameters and return values must have explicit types declared.
 
 ### Syntax
 
@@ -33,15 +52,46 @@ def function_name(param: type, param2: type) -> return_type:
 
 ```python
 def mul_nums(x: int8_t, y: int8_t) -> int8_t:
-    z: int8_t = x + y # possible overflow works like in C
+    z: int8_t = x + y  # possible overflow works like in C
     return z
+
+def add_floats(a: float32_t, b: float32_t) -> float32_t:
+    c: float32_t = a + b
+    return c
+
+def process_point(p: Point) -> int32_t:
+    x: int32_t = cast(p.x, int32_t)
+    y: int32_t = cast(p.y, int32_t)
+    return x + y
 ```
+
+Similar functions are fully supported with the same syntax and semantics.
+
+```python
+def function_name(param: type, param2: type) -> return_type:
+    # function body
+    return value
+```
+
+### Examples
+
+```python
+def mul_nums(x: int8_t, y: int8_t) -> int8_t:
+    z: int8_t = x + y  # possible overflow works like in C
+    return z
 
 Similar functions are fully supported with the same syntax and semantics.
 
 ## Structs
 
 Structs are defined using the `struct` base class. TYPY does not support multiple inheritance; classes inherit from a single base class.
+
+### Allocation Strategy
+
+The allocation strategy for structs is determined by the return type of the `__new__` method:
+
+- Returns `T` (the struct type itself) → **Stack allocation** (default)
+- Returns `Ptr[T]` → **Heap allocation** (manual)
 
 ### Syntax
 
@@ -57,9 +107,9 @@ class Point(struct):
         return result
 
 
-p0 := Point(10.0, 20.0)
-p1 := Point(20.0, 30.0)
-p2 := p0.add(p1)
+p0: Point = Point(10.0, 20.0)
+p1: Point = Point(20.0, 30.0)
+p2: Point = p0.add(p1)
 ```
 
 ### Generic Functions
@@ -68,37 +118,174 @@ Generic functions follow a similar pattern:
 
 ```python
 def mul[U, V, Z](x: U, y: V) -> Z:
-   z: Z = cast(x, Z) + cast(y, V)
-   return z
+    z: Z = cast(x, Z) + cast(y, V)
+    return z
 ```
 
 ### Generic Structs
 
-Classes support generics, allowing structs to work with different types:
+Classes support generics, allowing structs to work with different types. The allocation strategy works the same way for generic structs:
 
 ```python
 class Point[T](struct):
-   x: T
-   y: T
+    x: T
+    y: T
 
-   def add(self, other: Point[T]) -> Point[T]:
+    def add(self, other: Point[T]) -> Point[T]:
         result: Point[T] = Point[T](0)
         result.x = self.x + other.x
         result.y = self.y + other.y
         return result
 
 p0: Point[int32_t] = Point[int32_t](10, 20)
-p1: Point = Point[int32_t](10, 20)
+p1: Point[int32_t] = Point[int32_t](10, 20)
 p0 = Point[int32_t](10, 20)
 
 p1: Point[float32_t] = Point[float32_t](10.0, 20.0)
-p1: Point = Point[float32_t](10.0, 20.0)
 p1 = Point[float32_t](10.0, 20.0)
+```
+
+### Heap-Allocated Generic Structs
+
+For heap allocation, the same pattern applies:
+
+```python
+class Point1[T](struct):
+    x: T
+    y: T
+
+    def __new__(cls, x: T, y: T) -> Ptr[Point1[T]]:
+        self: Ptr[Point1[T]] = cast(malloc(sizeof(Point1[T])), Ptr[Point1[T]])
+        self[0].x = x
+        self[0].y = y
+        return self
+
+p1: Ptr[Point1[int32_t]] = Point1[int32_t](10, 20)
+free(p1)
+```
+
+## Structs
+
+Structs are defined using the `struct` base class. TYPY does not support multiple inheritance; classes inherit from a single base class.
+
+### Allocation Strategy
+
+The allocation strategy for structs is determined by the return type of the `__new__` method:
+
+- Returns `T` (the struct type itself) → **Stack allocation** (default)
+- Returns `Ptr[T]` → **Heap allocation** (manual)
+
+### Syntax
+
+```python
+class Point(struct):
+    x: float32_t
+    y: float32_t
+
+    def add(self, other: Point) -> Point:
+        result: Point = Point(0.0, 0.0)
+        result.x = self.x + other.x
+        result.y = self.y + other.y
+        return result
+
+
+p0: Point = Point(10.0, 20.0)
+p1: Point = Point(20.0, 30.0)
+p2: Point = p0.add(p1)
+```
+
+### Generic Functions
+
+Generic functions follow a similar pattern:
+
+```python
+def mul[U, V, Z](x: U, y: V) -> Z:
+    z: Z = cast(x, Z) + cast(y, V)
+    return z
+```
+
+### Generic Structs
+
+Classes support generics, allowing structs to work with different types. The allocation strategy works the same way for generic structs:
+
+```python
+class Point[T](struct):
+    x: T
+    y: T
+
+    def add(self, other: Point[T]) -> Point[T]:
+        result: Point[T] = Point[T](0)
+        result.x = self.x + other.x
+        result.y = self.y + other.y
+        return result
+
+p0: Point[int32_t] = Point[int32_t](10, 20)
+p1: Point[int32_t] = Point[int32_t](10, 20)
+p0 = Point[int32_t](10, 20)
+
+p1: Point[float32_t] = Point[float32_t](10.0, 20.0)
+p1 = Point[float32_t](10.0, 20.0)
+```
+
+### Heap-Allocated Generic Structs
+
+For heap allocation, the same pattern applies:
+
+```python
+class Point1[T](struct):
+    x: T
+    y: T
+
+    def __new__(cls, x: T, y: T) -> Ptr[Point1[T]]:
+        self: Ptr[Point1[T]] = cast(malloc(sizeof(Point1[T])), Ptr[Point1[T]])
+        self[0].x = x
+        self[0].y = y
+        return self
+
+p1: Ptr[Point1[int32_t]] = Point1[int32_t](10, 20)
+free(p1)
 ```
 
 ## Pointer Types
 
 Pointer types are defined as `Ptr[T]` where `T` is the pointed-to type.
+
+### Stack vs Heap Allocation
+
+**Stack Allocation (Default)**:
+```python
+p: Point = Point(10.0, 20.0)
+# Returns Point (not a pointer)
+# Stack-allocated
+# Lifetime tied to current scope
+# No manual free() needed
+```
+
+**Heap Allocation (Manual)**:
+```python
+p: Ptr[Point1] = Point1(10.0, 20.0)
+# Requires custom __new__ that returns Ptr[Point1]
+# Heap-allocated via malloc()
+# Must manually free() when done
+```
+
+Example of heap-allocated struct:
+```python
+class Point1(struct):
+    x: float32_t
+    y: float32_t
+
+    def __new__(cls, x: float32_t, y: float32_t) -> Ptr[Point1]:
+        self: Ptr[Point1] = cast(malloc(sizeof(Point1)), Ptr[Point1])
+        self[0].x = x
+        self[0].y = y
+        return self
+
+# Usage:
+p1: Ptr[Point1] = Point1(10.0, 20.0)
+# ... use p1 ...
+free(p1)  # Manual cleanup required
+```
 
 ### Syntax
 
@@ -118,3 +305,17 @@ c: int8_t = cast(p1, int8_t)[0] # unsafe pointer dereferencing
 - pointer dereferencing is performed using `[0]` on pointer objects
 - type-safe pointers are recommended for most use cases
 - type-unsafe pointers (`Ptr[void]`) are provided for low-level programming and should be used with caution
+
+### Memory Management
+
+- **No garbage collection**: Users are responsible for manually freeing heap-allocated memory
+- **Manual cleanup**: Use `free(pointer)` when done with heap-allocated structs
+- **Stack lifetime**: Stack-allocated structs are automatically cleaned up when they go out of scope
+- **No automatic destructors**: Since there's no garbage collection, explicit cleanup is required for heap-allocated resources
+
+### Memory Management
+
+- **No garbage collection**: Users are responsible for manually freeing heap-allocated memory
+- **Manual cleanup**: Use `free(pointer)` when done with heap-allocated structs
+- **Stack lifetime**: Stack-allocated structs are automatically cleaned up when they go out of scope
+- **No automatic destructors**: Since there's no garbage collection, explicit cleanup is required for heap-allocated resources

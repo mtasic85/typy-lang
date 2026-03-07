@@ -47,6 +47,8 @@ The `std` module provides C primitives, similar to libc (muslc, glibc):
 - **Floating-point Types**: float definitions (float, double, long double)
 - **Other C Types**: char, bool, size_t, pointers, etc.
 - **C Standard Library**: Standard C functions and utilities
+- **Memory Management**: malloc() and free() for manual heap allocation and deallocation
+- **Type Operations**: sizeof() for getting the size of types and structs
 
 ### ffi Module
 
