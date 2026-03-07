@@ -76,9 +76,10 @@ def function_name(param: type, param2: type) -> return_type:
 ### Examples
 
 ```python
-def mul_nums(x: int8_t, y: int8_t) -> int8_t:
+def add_nums(x: int8_t, y: int8_t) -> int8_t:
     z: int8_t = x + y  # possible overflow works like in C
     return z
+```
 
 Similar functions are fully supported with the same syntax and semantics.
 
@@ -90,8 +91,8 @@ Structs are defined using the `struct` base class. TYPY does not support multipl
 
 The allocation strategy for structs is determined by the return type of the `__new__` method:
 
-- Returns `T` (the struct type itself) → **Stack allocation** (default)
-- Returns `Ptr[T]` → **Heap allocation** (manual)
+- Returns `T` (the struct type itself) -> **Stack allocation** (default)
+- Returns `Ptr[T]` -> **Heap allocation** (manual)
 
 ### Syntax
 
@@ -156,8 +157,8 @@ class Point1[T](struct):
 
     def __new__(cls, x: T, y: T) -> Ptr[Point1[T]]:
         self: Ptr[Point1[T]] = cast(malloc(sizeof(Point1[T])), Ptr[Point1[T]])
-        self[0].x = x
-        self[0].y = y
+        self.x = x
+        self.y = y
         return self
 
 p1: Ptr[Point1[int32_t]] = Point1[int32_t](10, 20)
@@ -277,8 +278,8 @@ class Point1(struct):
 
     def __new__(cls, x: float32_t, y: float32_t) -> Ptr[Point1]:
         self: Ptr[Point1] = cast(malloc(sizeof(Point1)), Ptr[Point1])
-        self[0].x = x
-        self[0].y = y
+        self.x = x
+        self.y = y
         return self
 
 # Usage:
@@ -294,7 +295,7 @@ a: int8_t = 10
 p0: Ptr[int8_t] = ptr(a) # type-safe pointer, works like `int8_t * p0 = &a`
 p1: Ptr[void] = ptr[void](a) # type-unsafe pointer, works like `void * p1 = (void*)(&a)`; this exists only for low-level programming. most users should not use this.
 b: int8_t = p0[0] # safe dereference pointer
-c: int8_t = cast(p1, int8_t)[0] # unsafe pointer dereferencing 
+c: int8_t = cast(p1, Ptr[int8_t])[0] # unsafe pointer dereferencing 
 ```
 
 ### Pointer Operations
