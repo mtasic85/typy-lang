@@ -9,21 +9,6 @@ All primitive types from the C standard library are fully supported in typy-lang
 ### Syntax
 
 ```python
-variable_name: type = value # value is of type `type` and it's found at compile-time
-```
-
-### Examples
-
-```python
-a: int8_t = 10 # value is of type int8_t and it's found at compile-time
-b: uint16_t = 11 # here value is of type uint16_t
-```
-
-## Variable Declaration and Definition
-
-### Syntax
-
-```python
 variable_name: type = value  # value is of type `type` and it's found at compile-time
 ```
 
@@ -51,7 +36,7 @@ def function_name(param: type, param2: type) -> return_type:
 ### Examples
 
 ```python
-def mul_nums(x: int8_t, y: int8_t) -> int8_t:
+def mul_ints(x: int8_t, y: int8_t) -> int8_t:
     z: int8_t = x + y  # possible overflow works like in C
     return z
 
@@ -59,10 +44,12 @@ def add_floats(a: float32_t, b: float32_t) -> float32_t:
     c: float32_t = a + b
     return c
 
+class Point(struct):
+    x: int32_t
+    y: int32_t
+
 def process_point(p: Point) -> int32_t:
-    x: int32_t = cast(p.x, int32_t)
-    y: int32_t = cast(p.y, int32_t)
-    return x + y
+    return p.x + p.y
 ```
 
 Similar functions are fully supported with the same syntax and semantics.
@@ -76,7 +63,7 @@ def function_name(param: type, param2: type) -> return_type:
 ### Examples
 
 ```python
-def add_nums(x: int8_t, y: int8_t) -> int8_t:
+def add_ints(x: int8_t, y: int8_t) -> int8_t:
     z: int8_t = x + y  # possible overflow works like in C
     return z
 ```
@@ -85,14 +72,14 @@ Similar functions are fully supported with the same syntax and semantics.
 
 ## Structs
 
-Structs are defined using the `struct` base class. TYPY does not support multiple inheritance; classes inherit from a single base class.
+Structs are defined using the `struct` base class. typy does not support multiple inheritance. Classes inherit from a single base class.
 
 ### Allocation Strategy
 
 The allocation strategy for structs is determined by the return type of the `__new__` method:
 
-- Returns `T` (the struct type itself) -> **Stack allocation** (default)
-- Returns `Ptr[T]` -> **Heap allocation** (manual)
+- Returns `T` (the struct type itself) -> **Stack allocation** (default implementation)
+- Returns `Ptr[T]` -> pointer or **Heap allocation** (manual implementation)
 
 ### Syntax
 
@@ -118,8 +105,8 @@ p2: Point = p0.add(p1)
 Generic functions follow a similar pattern:
 
 ```python
-def mul[U, V, Z](x: U, y: V) -> Z:
-    z: Z = cast(x, Z) + cast(y, V)
+def mul_nums[U, V, Z](x: U, y: V) -> Z:
+    z: Z = cast(x, Z) * cast(y, V)
     return z
 ```
 
@@ -133,16 +120,19 @@ class Point[T](struct):
     y: T
 
     def add(self, other: Point[T]) -> Point[T]:
-        result: Point[T] = Point[T](0)
+        result: Point[T] = Point[T](0, 0)
         result.x = self.x + other.x
         result.y = self.y + other.y
         return result
 
+# all three statements below are the same
 p0: Point[int32_t] = Point[int32_t](10, 20)
-p1: Point[int32_t] = Point[int32_t](10, 20)
+p0: Point = Point[int32_t](10, 20)
 p0 = Point[int32_t](10, 20)
 
+# all three statements below are the same
 p1: Point[float32_t] = Point[float32_t](10.0, 20.0)
+p1: Point = Point[float32_t](10.0, 20.0)
 p1 = Point[float32_t](10.0, 20.0)
 ```
 
@@ -160,91 +150,12 @@ class Point1[T](struct):
         self.x = x
         self.y = y
         return self
+    
+    def __del__(self):
+        free(self)
 
 p1: Ptr[Point1[int32_t]] = Point1[int32_t](10, 20)
-free(p1)
-```
-
-## Structs
-
-Structs are defined using the `struct` base class. TYPY does not support multiple inheritance; classes inherit from a single base class.
-
-### Allocation Strategy
-
-The allocation strategy for structs is determined by the return type of the `__new__` method:
-
-- Returns `T` (the struct type itself) → **Stack allocation** (default)
-- Returns `Ptr[T]` → **Heap allocation** (manual)
-
-### Syntax
-
-```python
-class Point(struct):
-    x: float32_t
-    y: float32_t
-
-    def add(self, other: Point) -> Point:
-        result: Point = Point(0.0, 0.0)
-        result.x = self.x + other.x
-        result.y = self.y + other.y
-        return result
-
-
-p0: Point = Point(10.0, 20.0)
-p1: Point = Point(20.0, 30.0)
-p2: Point = p0.add(p1)
-```
-
-### Generic Functions
-
-Generic functions follow a similar pattern:
-
-```python
-def mul[U, V, Z](x: U, y: V) -> Z:
-    z: Z = cast(x, Z) + cast(y, V)
-    return z
-```
-
-### Generic Structs
-
-Classes support generics, allowing structs to work with different types. The allocation strategy works the same way for generic structs:
-
-```python
-class Point[T](struct):
-    x: T
-    y: T
-
-    def add(self, other: Point[T]) -> Point[T]:
-        result: Point[T] = Point[T](0)
-        result.x = self.x + other.x
-        result.y = self.y + other.y
-        return result
-
-p0: Point[int32_t] = Point[int32_t](10, 20)
-p1: Point[int32_t] = Point[int32_t](10, 20)
-p0 = Point[int32_t](10, 20)
-
-p1: Point[float32_t] = Point[float32_t](10.0, 20.0)
-p1 = Point[float32_t](10.0, 20.0)
-```
-
-### Heap-Allocated Generic Structs
-
-For heap allocation, the same pattern applies:
-
-```python
-class Point1[T](struct):
-    x: T
-    y: T
-
-    def __new__(cls, x: T, y: T) -> Ptr[Point1[T]]:
-        self: Ptr[Point1[T]] = cast(malloc(sizeof(Point1[T])), Ptr[Point1[T]])
-        self[0].x = x
-        self[0].y = y
-        return self
-
-p1: Ptr[Point1[int32_t]] = Point1[int32_t](10, 20)
-free(p1)
+del p1
 ```
 
 ## Pointer Types
@@ -267,25 +178,7 @@ p: Point = Point(10.0, 20.0)
 p: Ptr[Point1] = Point1(10.0, 20.0)
 # Requires custom __new__ that returns Ptr[Point1]
 # Heap-allocated via malloc()
-# Must manually free() when done
-```
-
-Example of heap-allocated struct:
-```python
-class Point1(struct):
-    x: float32_t
-    y: float32_t
-
-    def __new__(cls, x: float32_t, y: float32_t) -> Ptr[Point1]:
-        self: Ptr[Point1] = cast(malloc(sizeof(Point1)), Ptr[Point1])
-        self.x = x
-        self.y = y
-        return self
-
-# Usage:
-p1: Ptr[Point1] = Point1(10.0, 20.0)
-# ... use p1 ...
-free(p1)  # Manual cleanup required
+# Must manually free() when done; or `del p` which will trigger `Point1.__del__`
 ```
 
 ### Syntax
