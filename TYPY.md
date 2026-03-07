@@ -50,7 +50,9 @@ The `std` module provides C primitives, similar to libc (muslc, glibc):
 
 ### ffi Module
 
-The `ffi` module provides Foreign Function Interface capabilities:
+The `ffi` module provides Foreign Function Interface capabilities (based on libffi).
+
+**Note**: This is not a priority focus at this stage.
 
 - **C Library Interaction**: Call functions from external C libraries
 - **Memory Management**: Allocate and manage C memory
@@ -66,3 +68,5 @@ This specification is defined incrementally as the language evolves. New feature
 - No assumptions made about the language at this stage
 - Everything is being defined from scratch
 - Starting point: C semantics + Python syntax
+
+For detailed language specifications, see [SPEC.md](./SPEC.md).
