@@ -39,6 +39,45 @@ def mul_nums(x: int8_t, y: int8_t) -> int8_t:
 
 Similar functions are fully supported with the same syntax and semantics.
 
+## Structs
+
+Structs are defined using the `struct` base class. TYPY does not support multiple inheritance; classes inherit from a single base class.
+
+### Syntax
+
+```python
+class Point(struct):
+    x: float32_t
+    y: float32_t
+
+
+p0 := Point(10.0, 20.0)
+p1 := Point(20.0, 30.0)
+```
+
+### Generic Functions
+
+Generic functions follow a similar pattern:
+
+```python
+def mul[U, V, Z](x: U, y: V) -> Z:
+   z: Z = cast(x, Z) + cast(y, V)
+   return z
+```
+
+### Generic Structs
+
+Classes support generics, allowing structs to work with different types:
+
+```python
+class Point[T](struct):
+   x: T
+   y: T
+
+p0 := Point[int32_t](10, 20)
+p1 := Point[float32_t](10.0, 20.0)
+```
+
 ## Pointer Types
 
 Pointer types are defined as `Ptr[T]` where `T` is the pointed-to type.
