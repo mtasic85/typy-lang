@@ -141,12 +141,12 @@ p1 = Point[float32_t](10.0, 20.0)
 For heap allocation, the same pattern applies:
 
 ```python
-class Point1[T](struct):
+class HeapPoint[T](struct):
     x: T
     y: T
 
-    def __new__(cls, x: T, y: T) -> Ptr[Point1[T]]:
-        self: Ptr[Point1[T]] = cast(malloc(sizeof(Point1[T])), Ptr[Point1[T]])
+    def __new__(cls, x: T, y: T) -> Ptr[HeapPoint[T]]:
+        self: Ptr[HeapPoint[T]] = cast(malloc(sizeof(HeapPoint[T])), Ptr[HeapPoint[T]])
         self.x = x
         self.y = y
         return self
@@ -154,7 +154,7 @@ class Point1[T](struct):
     def __del__(self):
         free(self)
 
-p1: Ptr[Point1[int32_t]] = Point1[int32_t](10, 20)
+p1: Ptr[HeapPoint[int32_t]] = HeapPoint[int32_t](10, 20)
 del p1
 ```
 
@@ -175,10 +175,10 @@ p: Point = Point(10.0, 20.0)
 
 **Heap Allocation (Manual)**:
 ```python
-p: Ptr[Point1] = Point1(10.0, 20.0)
-# Requires custom __new__ that returns Ptr[Point1]
+p: Ptr[HeapPoint] = HeapPoint(10.0, 20.0)
+# Requires custom __new__ that returns Ptr[HeapPoint]
 # Heap-allocated via malloc()
-# Must manually free() when done; or `del p` which will trigger `Point1.__del__`
+# Must manually free() when done; or `del p` which will trigger `HeapPoint.__del__`
 ```
 
 ### Syntax
