@@ -74,8 +74,13 @@ class Point[T](struct):
    x: T
    y: T
 
-p0 := Point[int32_t](10, 20)
-p1 := Point[float32_t](10.0, 20.0)
+p0: Point[int32_t] = Point[int32_t](10, 20)
+p0: Point = Point[int32_t](10, 20)
+p0 = Point[int32_t](10, 20)
+
+p1: Point[float32_t] = Point[float32_t](10.0, 20.0)
+p1: Point = Point[float32_t](10.0, 20.0)
+p1 = Point[float32_t](10.0, 20.0)
 ```
 
 ## Pointer Types
