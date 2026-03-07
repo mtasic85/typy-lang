@@ -48,16 +48,16 @@ Pointer types are defined as `Ptr[T]` where `T` is the pointed-to type.
 ```python
 a: int8_t = 10
 p0: Ptr[int8_t] = ptr(a) # type-safe pointer, works like `int8_t * p0 = &a`
-p1: Ptr[void] = ptr[void](a) # type unsafe pointer, works like `void * p1 = (void*)(&a)` . this exists only for low-level programming. most of users should not use this.
+p1: Ptr[void] = ptr[void](a) # type-unsafe pointer, works like `void * p1 = (void*)(&a)`; this exists only for low-level programming. most users should not use this.
 b: int8_t = p0[0] # safe dereference pointer
 c: int8_t = cast(p1, int8_t)[0] # unsafe pointer dereferencing 
 ```
 
 ### Pointer Operations
 
-- `ptr(value)` - Creates a type-safe pointer to the value
-- `ptr[T](value)` - Creates a type-unsafe pointer to the value
-- `cast(value, target_type)` - Casts a value to a target type, useful for unsafe pointer dereferencing
-- Pointer dereferencing is performed using `[0]` on pointer objects
-- Type-safe pointers are recommended for most use cases
-- Type-unsafe pointers (`Ptr[void]`) are provided for low-level programming and should be used with caution
+- `ptr(value)` - creates a type-safe pointer to the value
+- `ptr[T](value)` - creates a type-unsafe pointer to the value
+- `cast(value, target_type)` - casts a value to a target type, useful for unsafe pointer dereferencing
+- pointer dereferencing is performed using `[0]` on pointer objects
+- type-safe pointers are recommended for most use cases
+- type-unsafe pointers (`Ptr[void]`) are provided for low-level programming and should be used with caution
