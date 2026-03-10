@@ -142,11 +142,12 @@ For heap allocation, the same pattern applies:
 
 ```python
 class HeapPoint[T](struct):
+    type Self = HeapPoint[T]
     x: T
     y: T
 
-    def __new__(cls, x: T, y: T) -> Ptr[HeapPoint[T]]:
-        self: Ptr[HeapPoint[T]] = cast(malloc(sizeof(HeapPoint[T])), Ptr[HeapPoint[T]])
+    def __new__(cls, x: T, y: T) -> Ptr[Self]:
+        self: Self = cast(malloc(sizeof(Self)), Ptr[Self])
         self.x = x
         self.y = y
         return self
@@ -154,7 +155,11 @@ class HeapPoint[T](struct):
     def __del__(self):
         free(self)
 
+# all four statements below are the same
 p1: Ptr[HeapPoint[int32_t]] = HeapPoint[int32_t](10, 20)
+p1: Ptr[HeapPoint] = HeapPoint[int32_t](10, 20)
+p1: Ptr = HeapPoint[int32_t](10, 20)
+p1 = HeapPoint[int32_t](10, 20)
 del p1
 ```
 
