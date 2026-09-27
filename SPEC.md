@@ -2,15 +2,38 @@
 
 ## Primitive Types
 
-All primitive types from the C standard library are fully supported in typy-lang. This includes integer types (int8_t, int16_t, int32_t, int64_t, etc.), floating-point types (float, double, long double), and other C types (char, bool, size_t, pointers, etc.).
+All primitive types from the C standard library are fully supported in `typy-lang`. This includes integer types (`int8_t`, `uint16_t`, `int32_t`, `uint64_t`, etc.), floating-point types (`float`, `double`, `long double`), and other C types (`char`, `bool`, `size_t`, pointers, etc.).
 
 ## Variable Declaration and Definition
+
+Closures and code blocks have variable and their types associated.
+Type instances and primitive values do not have pointers to their types.
+Type objects (class blocks) are more complex objects which have associations with other types, functions, etc.
+Functions are callables with signatures which are enforced at compile time but which can be introspected during run-time.
+In case of type inference, if type of an instance cannot be "found" it means it cannot be statically defined.
+This way we can do run-time introspection and still have static compiled language.
+
+Variables are by default on the stack, but if `malloc` (and similar) are used it can be put on heap.
+There is no automatic garbage collection.
+You can implement your own memory management, use Automatic Reference Counting (`ARC`) or explicit allocator (`Allocator`) which can destruct all objects at once requested.
+
+Since types like `list`, `dict` and `set` can dynamically grow, they are implemented on heap with non-moving memory management (similar to C++ `std::hive` https://isocpp.org/files/papers/P0447R19.html and https://en.cppreference.com/cpp/header/hive). It is up to developer to create and destroy them.
 
 ### Syntax
 
 ```python
 variable_name: type = value  # value is of type `type` and it's found at compile-time
+
+arr1: int8_t[10] = [] # stack; zero'ed arrays by default
+
+arr2: Ptr[int8_t] = cast(Ptr[int8_t], malloc(sizeof(int8_t) * 10)) # heap
+free(arr2)
+
+arr3: Ptr[int8_t] = alloc[int8_t](10) # heap, malloc based
+del arr3
 ```
+
+---
 
 ### Examples
 
@@ -23,7 +46,7 @@ d: bool = True  # boolean value
 
 ## Function Definitions
 
-Function definitions in TYPY follow strict typing rules. All parameters and return values must have explicit types declared.
+Function definitions in typy follow strict typing rules. All parameters and return values must have explicit types declared.
 
 ### Syntax
 

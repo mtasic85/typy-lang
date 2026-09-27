@@ -1,6 +1,6 @@
 # typy
 
-typy (aka typy-lang) is strongly typed Python subset.
+`typy` (aka `typy-lang`) is strongly typed Python subset.
 
 New builtins.
 New stdlib.
