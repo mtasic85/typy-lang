@@ -72,3 +72,8 @@ uint8_t c;
     assert(!__r1, "panic: OverflowError");
     c = (uint8_t)(__r0);
 ```
+
+## struct
+
+```python
+```
